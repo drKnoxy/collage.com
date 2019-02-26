@@ -23,10 +23,13 @@ const app = {
       document.getElementById(`btn-${mode}`).addEventListener("click", () => {
         this.mode = mode;
         this.pos = null;
+        this.selectedLayer = null;
         this.updateToolbarState();
+        this.render();
       });
     });
 
+    // You aren't ever really in "erase mode" thought that would be a cool feature
     document.getElementById("btn-erase").addEventListener("click", () => {
       if (this.selectedLayer !== null) {
         this.removeLayer(this.selectedLayer);
@@ -46,44 +49,25 @@ const app = {
   },
 
   bindDrawAreaEvents: function() {
-    const canvas = document.getElementById("canvas");
-    canvas.addEventListener("click", e => {
-      const { offsetX: x, offsetY: y } = e;
-
-      switch (this.mode) {
-        case "line":
-          if (!this.pos) {
-            // save first click of the line
-            this.pos = [x, y];
-          } else {
-            // create the line and add to the list
-            const x0 = this.pos[0];
-            const y0 = this.pos[1];
-            const length = Math.sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
-            const line = new Line(x0, y0, x, y, length);
-            this.layers.push(line);
-            this.pos = null;
-          }
-          break;
-
-        case "select":
-          const closestIndex = this.getClosestLayer(x, y);
-          this.selectedLayer = closestIndex;
-          break;
-        default:
-          break;
-      }
-
-      this.render();
-    });
+    const canvas = this.getCanvas();
 
     const handleByMode = e => {
       switch (this.mode) {
+        case "line":
+          if (e.type !== "mousedown") return;
+          this.handleLineDrawing(e);
+          break;
+        case "select":
+          if (e.type !== "mousedown") return;
+          const closestIndex = this.getClosestLayer(e.offsetX, e.offsetY);
+          this.selectedLayer = closestIndex;
+          this.render();
+          break;
         case "pencil":
           this.drawHandler(e);
           break;
         case "move":
-          this.dragHandler(e);
+          this.dragHandler(e, { width: canvas.width, height: canvas.height });
           break;
         default:
           break;
@@ -96,22 +80,48 @@ const app = {
     canvas.addEventListener("mouseout", handleByMode, false);
   },
 
-  dragHandler: function(e) {
+  handleLineDrawing: function(e) {
+    const { offsetX: x, offsetY: y } = e;
+
+    if (!this.pos) {
+      // save first click of the line
+      this.pos = [x, y];
+    } else {
+      // create the line and add to the list
+      const x0 = this.pos[0];
+      const y0 = this.pos[1];
+      const length = Math.sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
+      const line = new Line(x0, y0, x, y, length);
+      this.layers.push(line);
+      this.pos = null;
+      this.render();
+    }
+  },
+
+  isDragging: false,
+  dragHandler: function(e, canvasDimensions) {
     const { offsetX: x, offsetY: y } = e;
 
     switch (e.type) {
       case "mousedown":
+        this.isDragging = true;
         const closestIndex = this.getClosestLayer(x, y);
         this.selectedLayer = closestIndex;
         break;
+
       case "mousemove":
-        if (this.selectedLayer !== null) {
-          this.layers[this.selectedLayer].move(e.movementX, e.movementY);
+        if (this.selectedLayer !== null && this.isDragging) {
+          const layer = this.layers[this.selectedLayer];
+          layer.move(e.movementX, e.movementY, canvasDimensions);
           this.render();
         }
         break;
+
       case "mouseup":
+      case "mouseout":
         this.selectedLayer = null;
+        this.isDragging = false;
+        this.render();
         break;
       default:
         break;
@@ -139,6 +149,7 @@ const app = {
         this.drawing.push([x, y]);
         break;
       case "mouseup":
+        if (!this.isDrawing) return;
         ctx.lineTo(x, y);
         ctx.stroke();
         this.drawing.push([x, y]);
@@ -179,9 +190,12 @@ const app = {
     this.layers.splice(i, 1);
   },
 
+  getCanvas: function() {
+    return document.getElementById("canvas");
+  },
+
   getCtx: function() {
-    const canvas = document.getElementById("canvas");
-    return canvas.getContext("2d");
+    return this.getCanvas().getContext("2d");
   },
 
   render: function() {

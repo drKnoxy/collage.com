@@ -46,3 +46,36 @@ Path.prototype.squareDistanceFrom = function(x, y) {
       : distanceFromSegment;
   }, Infinity);
 };
+
+// Y axis increases downward
+Path.prototype.move = function(dx, dy, canvasDimensions) {
+  const p0 = this.points[0];
+  let xmin = p0[0];
+  let xmax = p0[0];
+  let ymin = p0[1];
+  let ymax = p0[1];
+
+  for (let i = 0; i < this.points.length; i++) {
+    const p = this.points[i];
+
+    if (p[0] < xmin) xmin = p[0];
+    if (p[0] > xmax) xmax = p[0];
+    if (p[1] < ymin) ymin = p[1];
+    if (p[1] > ymax) ymax = p[1];
+  }
+
+  // Do we have a collision
+  if (
+    xmin + dx < 0 ||
+    xmax + dx > canvasDimensions.width ||
+    ymin + dy < 0 ||
+    ymax + dy > canvasDimensions.height
+  ) {
+    return;
+  }
+
+  this.points.forEach(point => {
+    point[0] += dx;
+    point[1] += dy;
+  });
+};

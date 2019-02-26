@@ -27,11 +27,27 @@ Line.prototype.drawEnds = function(ctx) {
   drawEnd(this.x2, this.y2);
 };
 
-Line.prototype.move = function(dx, dy) {
+Line.prototype.move = function(dx, dy, canvasDimensions) {
+  if (
+    isYCollision(this.y1) ||
+    isYCollision(this.y2) ||
+    isXCollision(this.x1) ||
+    isXCollision(this.x2)
+  ) {
+    return;
+  }
+
   this.x1 += dx;
   this.y1 += dy;
   this.x2 += dx;
   this.y2 += dy;
+
+  function isYCollision(y) {
+    return y + dy > canvasDimensions.height || y + dy < 0;
+  }
+  function isXCollision(x) {
+    return x + dx > canvasDimensions.width || x + dx < 0;
+  }
 };
 
 Line.prototype.squareDistanceFrom = function(x, y) {
