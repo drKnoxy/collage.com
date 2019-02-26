@@ -1,6 +1,9 @@
+// @ts-check
+
 const app = {
   initDone: false,
-  isEraseMode: false,
+  mode: "line",
+  modes: ["line", "select", "pencil", "move"],
   lines: [],
   pos: null,
 
@@ -14,25 +17,26 @@ const app = {
   },
 
   bindToolbarEvents: function() {
-    document.getElementById("btn-erase").addEventListener("click", () => {
-      this.isEraseMode = true;
-      this.pos = null;
-      this.updateToolbarState();
+    this.modes.forEach(mode => {
+      document.getElementById(`btn-${mode}`).addEventListener("click", () => {
+        this.mode = mode;
+        this.pos = null;
+        this.updateToolbarState();
+      });
     });
-    document.getElementById("btn-line").addEventListener("click", () => {
-      this.isEraseMode = false;
-      this.pos = null;
-      this.updateToolbarState();
+
+    document.getElementById("btn-erase").addEventListener("click", () => {
+      console.log("delete active line"); //TODO
     });
   },
 
   updateToolbarState: function() {
-    document.getElementById("btn-erase").className = this.isEraseMode
-      ? "active"
-      : "";
-    document.getElementById("btn-line").className = this.isEraseMode
-      ? ""
-      : "active";
+    this.modes.forEach(mode => {
+      const isActive = mode === this.mode;
+      document.getElementById(`btn-${mode}`).className = isActive
+        ? "active"
+        : "";
+    });
   },
 
   bindDrawAreaEvents: function() {
