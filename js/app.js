@@ -3,11 +3,9 @@
 const app = {
   initDone: false,
   mode: "line",
-
   modes: ["line", "select", "pencil", "move"],
-  lines: [],
-  /** @type {null|number} */
-  selectedLine: null,
+  layers: [],
+  selectedLayer: null,
   pos: null,
 
   init: function() {
@@ -29,8 +27,8 @@ const app = {
     });
 
     document.getElementById("btn-erase").addEventListener("click", () => {
-      if (this.selectedLine !== null) {
-        this.removeLine(this.selectedLine);
+      if (this.selectedLayer !== null) {
+        this.removeLine(this.selectedLayer);
         this.selectedLine = null;
         this.render();
       }
@@ -63,18 +61,18 @@ const app = {
               y0 = this.pos[1];
             const length = Math.sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
             const line = new Line(x0, y0, x, y, length);
-            this.lines.push(line);
+            this.layers.push(line);
             this.pos = null;
           }
           break;
 
         case "select":
-          if (this.lines.length === 0) return;
+          if (this.layers.length === 0) return;
 
           let minSquareDistance = 10;
           let closestIndex = null;
 
-          this.lines.forEach((line, index) => {
+          this.layers.forEach((line, index) => {
             const squareDistance = line.squareDistanceFrom(x, y);
             if (squareDistance < minSquareDistance) {
               minSquareDistance = squareDistance;
@@ -129,12 +127,12 @@ const app = {
         ctx.stroke();
         this.drawing.push([x, y]);
         this.isDrawing = false;
-        this.lines.push(new Path(this.drawing));
+        this.layers.push(new Path(this.drawing));
         this.drawing = [];
         break;
       case "mouseout":
         this.isDrawing = false;
-        this.lines.push(new Path(this.drawing));
+        this.layers.push(new Path(this.drawing));
         this.drawing = [];
         break;
 
@@ -145,7 +143,7 @@ const app = {
 
   /** @param {number} i */
   removeLine: function(i) {
-    this.lines.splice(i, 1);
+    this.layers.splice(i, 1);
   },
 
   getCtx: function() {
@@ -156,10 +154,10 @@ const app = {
   render: function() {
     const ctx = this.getCtx();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    this.lines.forEach((line, i) => {
-      line.draw(ctx);
-      if (this.selectedLine !== null && i === this.selectedLine) {
-        line.drawEnds(ctx);
+    this.layers.forEach((layer, i) => {
+      layer.draw(ctx);
+      if (this.selectedLayer !== null && i === this.selectedLayer) {
+        layer.drawEnds(ctx);
       }
     });
   }
