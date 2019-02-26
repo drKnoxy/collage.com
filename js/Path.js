@@ -26,6 +26,23 @@ Path.prototype.drawEnds = function(ctx) {
 };
 
 Path.prototype.squareDistanceFrom = function(x, y) {
-  console.log("Path@distance not implemented");
-  return 100;
+  return this.points.reduce((minDistance, secondPoint, i) => {
+    // Omit the first point, we are trying to compare to a line
+    if (i === 0) return minDistance;
+
+    const firstPoint = this.points[i - 1];
+    const distanceFromSegment = Geometry.squareDistanceToSegment(
+      x,
+      y,
+      firstPoint[0],
+      firstPoint[1],
+      secondPoint[0],
+      secondPoint[1]
+    );
+
+    // Return the lesser
+    return minDistance < distanceFromSegment
+      ? minDistance
+      : distanceFromSegment;
+  }, Infinity);
 };
