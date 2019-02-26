@@ -29,7 +29,7 @@ const app = {
       });
     });
 
-    // You aren't ever really in "erase mode" thought that would be a cool feature
+    // You aren't ever really in "erase mode" though that would be a cool feature
     document.getElementById("btn-erase").addEventListener("click", () => {
       if (this.selectedLayer !== null) {
         this.removeLayer(this.selectedLayer);

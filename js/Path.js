@@ -47,7 +47,6 @@ Path.prototype.squareDistanceFrom = function(x, y) {
   }, Infinity);
 };
 
-// Y axis increases downward
 Path.prototype.move = function(dx, dy, canvasDimensions) {
   const p0 = this.points[0];
   let xmin = p0[0];
