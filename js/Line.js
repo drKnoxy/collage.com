@@ -7,7 +7,7 @@ const Line = function(x1, y1, x2, y2, length) {
 };
 
 Line.prototype.draw = function(ctx) {
-  ctx.strokeStyle = '#000';
+  ctx.strokeStyle = "#000";
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(this.x1, this.y1);
@@ -16,7 +16,7 @@ Line.prototype.draw = function(ctx) {
 };
 
 Line.prototype.drawEnds = function(ctx) {
-  ctx.strokeStyle = '#000';
+  ctx.strokeStyle = "#000";
   ctx.lineWidth = 1;
   const drawEnd = (x, y) => {
     ctx.beginPath();

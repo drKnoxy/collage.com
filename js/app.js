@@ -83,10 +83,6 @@ const app = {
           });
 
           this.selectedLine = closestIndex;
-
-          break;
-        case "pencil":
-          console.log("not implemented");
           break;
 
         case "move":
@@ -99,15 +95,63 @@ const app = {
 
       this.render();
     });
+
+    canvas.addEventListener("mousedown", e => this.drawHandler(e), false);
+    canvas.addEventListener("mousemove", e => this.drawHandler(e), false);
+    canvas.addEventListener("mouseup", e => this.drawHandler(e), false);
   },
 
+  // Pencil drawing functionality
+  isDrawing: false,
+  drawing: [],
+  drawHandler: function(e) {
+    if (this.mode !== "pencil") return;
+
+    const ctx = this.getCtx();
+    const { offsetX: x, offsetY: y } = e;
+
+    switch (e.type) {
+      case "mousedown":
+        this.isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        this.drawing.push([x, y]);
+        break;
+
+      case "mousemove":
+        if (this.isDrawing) {
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          this.drawing.push([x, y]);
+        }
+        break;
+      case "mouseup":
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        this.drawing.push([x, y]);
+        this.isDrawing = false;
+        this.lines.push(new Path(this.drawing));
+        this.drawing = [];
+        break;
+
+      default:
+        break;
+    }
+  },
+
+  /** @param {number} i */
   removeLine: function(i) {
     this.lines.splice(i, 1);
   },
 
-  render: function() {
+  getCtx: function() {
     const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+    return canvas.getContext("2d");
+  },
+
+  render: function() {
+    const ctx = this.getCtx();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.lines.forEach((line, i) => {
       line.draw(ctx);
