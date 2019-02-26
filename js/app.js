@@ -69,29 +69,30 @@ const app = {
           break;
 
         case "select":
-          if (this.lines.length > 0) {
-            let minSquareDistance;
-            let closestIndex;
+          if (this.lines.length === 0) return;
 
-            this.lines.forEach((line, index) => {
-              const squareDistance = line.squareDistanceFrom(x, y);
-              if (index === 0 || squareDistance < minSquareDistance) {
-                minSquareDistance = squareDistance;
-                closestIndex = index;
-              }
-            });
+          let minSquareDistance = 10;
+          let closestIndex = null;
 
-            console.log(closestIndex);
-            this.selectedLine = closestIndex;
-          }
-          console.log("not implemented");
+          this.lines.forEach((line, index) => {
+            const squareDistance = line.squareDistanceFrom(x, y);
+            if (squareDistance < minSquareDistance) {
+              minSquareDistance = squareDistance;
+              closestIndex = index;
+            }
+          });
+
+          this.selectedLine = closestIndex;
+
           break;
         case "pencil":
           console.log("not implemented");
           break;
+
         case "move":
           console.log("not implemented");
           break;
+
         default:
           break;
       }
