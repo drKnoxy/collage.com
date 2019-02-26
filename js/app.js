@@ -99,6 +99,7 @@ const app = {
     canvas.addEventListener("mousedown", e => this.drawHandler(e), false);
     canvas.addEventListener("mousemove", e => this.drawHandler(e), false);
     canvas.addEventListener("mouseup", e => this.drawHandler(e), false);
+    canvas.addEventListener("mouseout", e => this.drawHandler(e), false);
   },
 
   // Pencil drawing functionality
@@ -117,19 +118,21 @@ const app = {
         ctx.moveTo(x, y);
         this.drawing.push([x, y]);
         break;
-
       case "mousemove":
-        if (this.isDrawing) {
-          ctx.lineTo(x, y);
-          ctx.stroke();
-          this.drawing.push([x, y]);
-        }
+        if (!this.isDrawing) return;
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        this.drawing.push([x, y]);
         break;
       case "mouseup":
         ctx.lineTo(x, y);
         ctx.stroke();
-
         this.drawing.push([x, y]);
+        this.isDrawing = false;
+        this.lines.push(new Path(this.drawing));
+        this.drawing = [];
+        break;
+      case "mouseout":
         this.isDrawing = false;
         this.lines.push(new Path(this.drawing));
         this.drawing = [];
